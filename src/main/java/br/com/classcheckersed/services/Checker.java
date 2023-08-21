@@ -147,6 +147,29 @@ public class Checker {
                 "9° ANO C TARDE ANUAL", "38568651"
         );
 
+        Map<String, String> classesEM1 = Map.of(
+                        "1ª SERIE A MANHA ANUAL", "38518937",
+                        "1ª SERIE B MANHA ANUAL", "38519000",
+                        "1ª SERIE C MANHA ANUAL", "38518873",
+                        "1ª SERIE D MANHA ANUAL", "38804599",
+                        "1ª SERIE E TARDE ANUAL", "38804638",
+                        "1ª SERIE F NOITE ANUAL", "38890687",
+                        "2ª SERIE A MANHA ANUAL", "38522999",
+                        "2ª SERIE B MANHA ANUAL", "38523063",
+                        "2ª SERIE C MANHA ANUAL", "38523128",
+                        "2ª SERIE D MANHA ANUAL", "38523192"
+        );
+        Map<String, String> classesEM2 = Map.of(
+                "2ª SERIE E NOITE ANUAL", "38523256",
+                "2ª SERIE F NOITE ANUAL", "39149850",
+                "3ª SERIE B MANHA ANUAL", "38632054",
+                "3ª SERIE C MANHA ANUAL", "38632310",
+                "3ª SERIE D MANHA ANUAL", "38632246",
+                "3ª SERIE E NOITE ANUAL", "38632374",
+                "3ª SERIE F NOITE ANUAL", "38632182",
+                "3ª SERIE G NOITE ANUAL", "39149877"
+        );
+
         classesEF.forEach((key, value) -> {
             try {
             reveled = driver.findElement(By.id("filt-turma"));
