@@ -8,6 +8,8 @@ import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.io.File;
@@ -19,6 +21,7 @@ import java.util.List;
 
 public class Checker {
 
+    private static Logger logger = LoggerFactory.getLogger(Checker.class);
     private EdgeDriver driver;
     private Wait<WebDriver> wait;
     private WebElement reveled;
@@ -36,86 +39,92 @@ public class Checker {
     @Value("${api.url_relatorio}")
     private String url_relatorio;
 
-    private int cont = 0;
+    private int cont = 1;
 
     public Checker() {
-
     }
 
     public void classChecker() throws IOException {
-
         try {
-            configBrowser();
-            login();
-            selectClasses();
+                configBrowser();
+                login();
+                selectClasses();
         } finally {
-            System.out.printf("VAI FINALIZAR!!!");
-            exiteLogin();
+            logger.atInfo().log("Finalizando o processo");
+                exiteLogin();
         }
     }
 
     private void configBrowser() throws IOException {
-
+            logger.atInfo().log("Configurando o browser");
         EdgeOptions edgeOptions = new EdgeOptions();
         edgeOptions.setPageLoadStrategy(PageLoadStrategy.NORMAL);
         driver = new EdgeDriver();
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
         wait = new WebDriverWait(driver, Duration.ofSeconds(15));
-
+            logger.atInfo().log("Browser configurado");
     }
 
     private void login(){
-
+                logger.atInfo().log("Iniciando o processo de login");
         try {
             driver.get("https://sed.educacao.sp.gov.br/");
             driver.findElement(By.id("name")).clear();
+                logger.atInfo().log("Preenchendo o usuário");
             driver.findElement(By.id("name")).sendKeys("xxx");
             driver.findElement(By.id("senha")).clear();
+                logger.atInfo().log("Preenchendo a senha");
             driver.findElement(By.id("senha")).sendKeys("xxx");
+                logger.atInfo().log("Clicando no botão de login");
             driver.findElement(By.id("botaoEntrar")).click();
 
             reveled = driver.findElement(By.linkText("PC / Coordenador de Gestão Pedagógica"));
             wait.until(d -> reveled.isDisplayed());
+
+            if (reveled.isDisplayed() == false) {
+                throw new RuntimeException("Erro no login");
+            }
+
             driver.findElement(By.linkText("PC / Coordenador de Gestão Pedagógica")).click();
 
             reveled = driver.findElement(By.id("btnFechar"));
             wait.until(d -> reveled.isDisplayed());
             driver.findElement(By.id("btnFechar")).click();
 
+            logger.atInfo().log("Redirecionando para a página de relatório de turmas");
             driver.get("https://sed.educacao.sp.gov.br/RegistroAula/RelatorioTurma");
 
             Thread.sleep(3000);
 
         } catch (Exception e) {
-            System.out.println("Erro no processo do login");
+            logger.atError().log("Erro no processo de login");
             e.printStackTrace();
+            exiteLogin();
         }
         finally {
+            logger.atInfo().log("Maximizando a tela");
             driver.manage().window().maximize();
+            logger.atInfo().log("Finalizando o processo de login");
         }
 
     }
 
     private void selectClasses(){
         try {
-
-            System.out.printf("VAI SELECIONAR AS TURMAS!!!");
+                logger.atInfo().log("Iniciando o processo de seleção das turmas");
             driver.findElement(By.id("filt-grupoescola"));
-            System.out.println("ACHOU A ESCOLA!!!");
 
             selectElement = driver.findElement(By.id("filt-escola"));
-            System.out.println("PREPARANDO PARA SELECIONAR A ESCOLA!!!");
+                logger.atInfo().log("Selecionando a escola");
             select = new Select(selectElement);
-                    //Id da escola
             select.selectByValue("10285");
-            System.out.println("SELECIONOU A ESCOLA!!!");
-
+                logger.atDebug().log("Escola selecionada" + select.getFirstSelectedOption().getText());
             Thread.sleep(2000);
 
             typeTuition();
 
         } catch (Exception e){
-            System.out.println("Erro no processo de selecionar as turmas");
+            logger.atError().log("Erro no processo de selecionar as turmas");
             e.printStackTrace();
         }
 
@@ -161,28 +170,27 @@ public class Checker {
         classesEM.add(new DataSelectorDTO("3ª SERIE F NOITE ANUAL", "38632182"));
         classesEM.add(new DataSelectorDTO("3ª SERIE G NOITE ANUAL", "39149877"));
 
-
         try {
             typeTuition.forEach(item -> {
-                System.out.println("VAI SELECIONAR O TIPO DE ENSINO!!!");
+                    logger.atInfo().log("Iniciando o processo de seleção do tipo de ensino");
 
                 try {
-
                 driver.findElement(By.id("filt-grupotipoEnsino"));
-                    System.out.println("ACHOU O TIPO DE ENSINO!!!");
                 selectElement = driver.findElement(By.id("filt-tipoEnsino"));
                 select = new Select(selectElement);
-                //Id do tipo de ensino
+                    logger.atDebug().log("Selecionando o tipo de ensino: " + item.getNome());
                 select.selectByValue(item.getId());
                 Thread.sleep(2000);
 
                 } catch (InterruptedException e) {
-                    System.out.println("Erro no processo de seleção do tipo de ensino");
+                    logger.atError().log("Erro no processo de seleção do tipo de ensino");
                     throw new RuntimeException(e);
                 } finally {
                     if (item.getId().equals("14")) {
+                        logger.atInfo().log("Iniciando o processo de seleção das turmas do ensino fundamental");
                         typeClass(typeClassEF);
                     } else {
+                        logger.atInfo().log("Iniciando o processo de seleção das turmas do ensino médio");
                         typeClass(classesEM);
                     }
                 }
@@ -190,35 +198,31 @@ public class Checker {
             });
 
         } catch (Exception e){
-            System.out.println("Erro no processo de selecionar o tipo de ensino");
+            logger.atError().log("Erro no processo de selecionar o tipo de ensino");
             e.printStackTrace();
         }
     }
 
     private void typeClass(List<DataSelectorDTO> typeClass){
-
             typeClass.forEach(item -> {
-
             try {
-            System.out.println("VAI SELECIONAR A TURMA!!!" + item.getNome());
+                logger.atInfo().log("Iniciando o processo de seleção da turma");
             Thread.sleep(2000);
             driver.findElement(By.id("filt-grupoturma"));
-                System.out.println("ACHOU A TURMA!!!");
             selectElement = driver.findElement(By.id("filt-turma"));
             select = new Select(selectElement);
-            //Id da turma
-                System.out.println("O value da turma é: " + item.getId());
+                logger.atDebug().log("Selecionando a turma: " + item.getNome());
             select.selectByValue(item.getId());
             Thread.sleep(5000);
             driver.findElement(By.id("btnPesquisar")).click();
             Thread.sleep(5000);
             } catch (InterruptedException e) {
-                System.out.println("Erro no processo de seleção da turma");
+                logger.atError().log("Erro no processo de seleção da turma");
                 throw new RuntimeException(e);
             } finally {
-                System.out.println("VAI PRINTAR A TELA!!!");
-                printScreenWindow(item.getNome());
-                System.out.println("PRINTOU A TELA!!!");
+                logger.atInfo().log("Iniciando o processo de printar a tela");
+                    printScreenWindow(item.getNome());
+                logger.atInfo().log("Finalizando o processo de printar a tela");
             }
         });
 
@@ -226,32 +230,32 @@ public class Checker {
 
     private void printScreenWindow(String nameClass) {
         try {
-
             Thread.sleep(1000);
-
-            System.out.println("PROCURANDO O MODAL!!!");
+            logger.atInfo().log("Procurando o modal para printar");
           WebElement modalPrint = driver.findElement(By.className("modal-content"));
-            System.out.println("ACHOU O MODAL!!!");
           File srcFile = modalPrint.getScreenshotAs(OutputType.FILE);
-            System.out.println("Fazendo o get do screenshot!!!");
+            logger.atInfo().log("Salvando o print");
           FileUtils.copyFile(srcFile, new File("C:\\Users\\andre\\Documents\\Teste_Prints\\"+ nameClass +".png"));
-            System.out.println("COPIOU O ARQUIVO E SALVOU!!!");
+            logger.atInfo().log("Print salvo");
           cont++;
-            System.out.println("O CONTADOR ESTÁ EM: " + cont);
+            logger.atInfo().log("Essa é a " + cont + "/28 turmas printadas");
 
         } catch (InterruptedException e) {
-            System.out.println("Erro no processo de printar a tela");
+            logger.atError().log("Erro no processo de printar a tela");
             e.printStackTrace();
         } catch (IOException e) {
-            System.out.println("Erro no processo de printar a tela");
+            logger.atError().log("Erro no processo de printar a tela");
             throw new RuntimeException(e);
         } finally {
+            logger.atInfo().log("Fechando o modal");
             driver.findElement(By.className("close")).click();
         }
     }
 
     private void exiteLogin(){
         driver.quit();
+        logger.atInfo().log("Processo finalizado");
+        System.exit(0);
     }
 
 }
