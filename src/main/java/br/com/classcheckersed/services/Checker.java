@@ -16,7 +16,6 @@ import java.time.Duration;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class Checker {
 
@@ -70,7 +69,7 @@ public class Checker {
         try {
             driver.get("https://sed.educacao.sp.gov.br/");
             driver.findElement(By.id("name")).clear();
-            driver.findElement(By.id("name")).sendKeys("xxxx");
+            driver.findElement(By.id("name")).sendKeys("xxx");
             driver.findElement(By.id("senha")).clear();
             driver.findElement(By.id("senha")).sendKeys("xxx");
             driver.findElement(By.id("botaoEntrar")).click();
@@ -129,45 +128,6 @@ public class Checker {
         typeTuition.add(new DataSelectorDTO("ENSINO FUNDAMENTAL DE 9 ANOS", "14"));
         typeTuition.add(new DataSelectorDTO("NOVO ENSINO MÉDIO", "101"));
 
-
-//        Map<String, String> tuition = Map.of(
-//                "ENSINO FUNDAMENTAL DE 9 ANOS", "14",
-//                "NOVO ENSINO MÉDIO", "101"
-//        );
-
-        try {
-            typeTuition.forEach(item -> {
-                System.out.println("VAI SELECIONAR O TIPO DE ENSINO!!!");
-
-                try {
-
-                driver.findElement(By.id("filt-grupotipoEnsino"));
-                    System.out.println("ACHOU O TIPO DE ENSINO!!!");
-//                reveled = driver.findElement(By.id("filt-tipoEnsino"));
-//                wait.until(d -> reveled.isDisplayed());
-                selectElement = driver.findElement(By.id("filt-tipoEnsino"));
-                select = new Select(selectElement);
-                //Id do tipo de ensino
-                select.selectByValue(item.getId());
-                Thread.sleep(2000);
-
-                } catch (InterruptedException e) {
-                    System.out.println("Erro no processo de seleção do tipo de ensino");
-                    throw new RuntimeException(e);
-                } finally {
-                    typeClass();
-                }
-
-            });
-
-        } catch (Exception e){
-            System.out.println("Erro no processo de selecionar o tipo de ensino");
-            e.printStackTrace();
-        }
-    }
-
-    private void typeClass(){
-
         List<DataSelectorDTO> typeClassEF = new ArrayList<>();
         typeClassEF.add(new DataSelectorDTO("6° ANO A TARDE ANUAL", "38555193"));
         typeClassEF.add(new DataSelectorDTO("6° ANO B TARDE ANUAL", "38555257"));
@@ -180,19 +140,6 @@ public class Checker {
         typeClassEF.add(new DataSelectorDTO("9° ANO B TARDE ANUAL", "38568587"));
         typeClassEF.add(new DataSelectorDTO("9° ANO C TARDE ANUAL", "38568651"));
 
-
-//        Map<String, String> classesEF = Map.of(
-//                "6° ANO A TARDE ANUAL", "38555193",
-//                "6° ANO B TARDE ANUAL", "38555257",
-//                "7° ANO A TARDE ANUAL", "38635943",
-//                "7° ANO B TARDE ANUAL", "38636007",
-//                "7° ANO C TARDE ANUAL", "38636071",
-//                "8° ANO A TARDE ANUAL", "38550907",
-//                "8° ANO B TARDE ANUAL", "38550970",
-//                "9° ANO A TARDE ANUAL", "38568523",
-//                "9° ANO B TARDE ANUAL", "38568587",
-//                "9° ANO C TARDE ANUAL", "38568651"
-//        );
 
         List<DataSelectorDTO> classesEM = new ArrayList<>();
         classesEM.add(new DataSelectorDTO("1ª SERIE A MANHA ANUAL", "38518937"));
@@ -215,37 +162,48 @@ public class Checker {
         classesEM.add(new DataSelectorDTO("3ª SERIE G NOITE ANUAL", "39149877"));
 
 
-//        Map<String, String> classesEM1 = Map.of(
-//                        "1ª SERIE A MANHA ANUAL", "38518937",
-//                        "1ª SERIE B MANHA ANUAL", "38519000",
-//                        "1ª SERIE C MANHA ANUAL", "38518873",
-//                        "1ª SERIE D MANHA ANUAL", "38804599",
-//                        "1ª SERIE E TARDE ANUAL", "38804638",
-//                        "1ª SERIE F NOITE ANUAL", "38890687",
-//                        "2ª SERIE A MANHA ANUAL", "38522999",
-//                        "2ª SERIE B MANHA ANUAL", "38523063",
-//                        "2ª SERIE C MANHA ANUAL", "38523128",
-//                        "2ª SERIE D MANHA ANUAL", "38523192"
-//        );
-//        Map<String, String> classesEM2 = Map.of(
-//                "2ª SERIE E NOITE ANUAL", "38523256",
-//                "2ª SERIE F NOITE ANUAL", "39149850",
-//                "3ª SERIE B MANHA ANUAL", "38632054",
-//                "3ª SERIE C MANHA ANUAL", "38632310",
-//                "3ª SERIE D MANHA ANUAL", "38632246",
-//                "3ª SERIE E NOITE ANUAL", "38632374",
-//                "3ª SERIE F NOITE ANUAL", "38632182",
-//                "3ª SERIE G NOITE ANUAL", "39149877"
-//        );
+        try {
+            typeTuition.forEach(item -> {
+                System.out.println("VAI SELECIONAR O TIPO DE ENSINO!!!");
 
-            typeClassEF.forEach(item -> {
+                try {
+
+                driver.findElement(By.id("filt-grupotipoEnsino"));
+                    System.out.println("ACHOU O TIPO DE ENSINO!!!");
+                selectElement = driver.findElement(By.id("filt-tipoEnsino"));
+                select = new Select(selectElement);
+                //Id do tipo de ensino
+                select.selectByValue(item.getId());
+                Thread.sleep(2000);
+
+                } catch (InterruptedException e) {
+                    System.out.println("Erro no processo de seleção do tipo de ensino");
+                    throw new RuntimeException(e);
+                } finally {
+                    if (item.getId().equals("14")) {
+                        typeClass(typeClassEF);
+                    } else {
+                        typeClass(classesEM);
+                    }
+                }
+
+            });
+
+        } catch (Exception e){
+            System.out.println("Erro no processo de selecionar o tipo de ensino");
+            e.printStackTrace();
+        }
+    }
+
+    private void typeClass(List<DataSelectorDTO> typeClass){
+
+            typeClass.forEach(item -> {
+
             try {
             System.out.println("VAI SELECIONAR A TURMA!!!" + item.getNome());
             Thread.sleep(2000);
             driver.findElement(By.id("filt-grupoturma"));
                 System.out.println("ACHOU A TURMA!!!");
-//            reveled = driver.findElement(By.id("filt-turma"));
-//            wait.until(d -> reveled.isDisplayed());
             selectElement = driver.findElement(By.id("filt-turma"));
             select = new Select(selectElement);
             //Id da turma
@@ -259,25 +217,27 @@ public class Checker {
                 throw new RuntimeException(e);
             } finally {
                 System.out.println("VAI PRINTAR A TELA!!!");
-                printScreenWindow();
+                printScreenWindow(item.getNome());
                 System.out.println("PRINTOU A TELA!!!");
             }
         });
 
     }
 
-    private void printScreenWindow() {
+    private void printScreenWindow(String nameClass) {
         try {
 
             Thread.sleep(1000);
 
-          WebElement modalPrint = driver.findElement(By.id("sedUiModalWrapper_1body"));
+            System.out.println("PROCURANDO O MODAL!!!");
+          WebElement modalPrint = driver.findElement(By.className("modal-content"));
             System.out.println("ACHOU O MODAL!!!");
           File srcFile = modalPrint.getScreenshotAs(OutputType.FILE);
             System.out.println("Fazendo o get do screenshot!!!");
-          FileUtils.copyFile(srcFile, new File("C:\\Users\\andre\\Documents\\Teste_Prints\\teste"+ cont +".png"));
+          FileUtils.copyFile(srcFile, new File("C:\\Users\\andre\\Documents\\Teste_Prints\\"+ nameClass +".png"));
             System.out.println("COPIOU O ARQUIVO E SALVOU!!!");
-          cont = cont + 1;
+          cont++;
+            System.out.println("O CONTADOR ESTÁ EM: " + cont);
 
         } catch (InterruptedException e) {
             System.out.println("Erro no processo de printar a tela");
@@ -286,7 +246,7 @@ public class Checker {
             System.out.println("Erro no processo de printar a tela");
             throw new RuntimeException(e);
         } finally {
-            driver.findElement(By.id("sedUiModalWrapper_1close")).click();
+            driver.findElement(By.className("close")).click();
         }
     }
 
